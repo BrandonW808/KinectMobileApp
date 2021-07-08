@@ -2,13 +2,12 @@
   "expo": {
     "name": "Kinect",
     "slug": "Kinect",
-    "version": "1.0.0",
+    "version": "1.0.6",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#BC313A"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -17,7 +16,16 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.kinect.kinectapp",
+      "buildNumber": "1.0.6",
+      "supportsTablet": true,
+      "icon": "./assets/faviconapple.png",
+    },
+    "android": {
+      "package": "com.kinect.kinect",
+      "versionCode": 12,
+      "permissions": [],
+      "icon": "./assets/favicon.png",
     },
     "web": {
       "favicon": "./assets/favicon.png"
