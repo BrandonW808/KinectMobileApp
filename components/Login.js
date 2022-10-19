@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Button } from 'react-native';
 import axios from "axios";
-import showhide from '../assets/showhide.png';
 import * as Device from 'expo-device';
+import { Dictionary } from '../dictionary';
+import { Languages } from '../enums';
 
 const CancelToken = axios.CancelToken;
 const source = CancelToken.source();
@@ -34,20 +35,23 @@ export default class Login extends Component {
   }
 
   toggleShowPassword(){
-    console.log("Toggling: " + !this.state.showPassword);
     this.setState({showPassword: !this.state.showPassword});
   }
 
   getUser(){
     (this.state.mounted) && this.setState({loading: true});
     let url = this.props.url + "/owners/getOwnerForApp";
-    axios.post(url, {
-      email: this.state.email.toLowerCase(),
-      pass: this.state.password,
-    },{
+    axios({
+      method: 'post',
+      url: url,
+      data: {
+        email: this.state.email.toLowerCase(),
+        pass: this.state.password,
+      },
       timeout: 10000,
       cancelToken: source.token
     }).then((data) => {
+      console.log("owner logged in");
       let ownerData = data.data;
       url = this.props.url + "/gyms/getGyms/" + ownerData.businessDB;
       axios.get(url, {
@@ -62,14 +66,15 @@ export default class Login extends Component {
           let gym = {
             name: data.data[i].name,
             localip: data.data[i].localip,
-            publicip: data.data[i].publicip
+            publicip: data.data[i].publicip,
+            _id: data.data[i]._id,
           }
           registeredGyms.push(gym);
         }
         ownerData['registeredGyms'] = registeredGyms;
+        this.props.appScreenHandler('owner-main-screen');
         this.props.ownerHandler(ownerData);
       }).catch((err) => {
-        console.log("Error from getUser()\n" + err);
         (this.state.mounted) && this.setState({loading: false});
         (this.state.mounted) && this.setState({attempted: true});
         (this.state.mounted) && this.setState({error: err.message});
@@ -77,20 +82,26 @@ export default class Login extends Component {
       });
     }).catch((ownerErr) => {
       url = this.props.url + "/members/memberAppLogin";
-      axios.post(url, {
-        email: this.state.email.toLowerCase(),
-        pass: this.state.password,
-        uid: Device.deviceName,
-      },{
+      axios({
+        method: 'post',
+        url: url,
+        data: {
+          email: this.state.email.toLowerCase(),
+          pass: this.state.password,
+          uid: Device.deviceName,
+        },
         timeout: 10000,
         cancelToken: source.token
       }).then((data) => {
         this.props.memberHandler(data.data);
+        this.props.sessionHandler(data.data.session);
+        this.props.appScreenHandler('member-main-screen');
       }).catch((err) => {
         (this.state.mounted) &&  this.setState({loading: false});
         (this.state.mounted) &&  this.setState({attempted: true});
-        this.setState({error: err.response.data});
-        console.log("ERROR: " + JSON.stringify(err.response));
+        if (err.response != undefined){
+          this.setState({error: err.response.data});
+        }
         this.render();
       });
     })
@@ -107,6 +118,8 @@ export default class Login extends Component {
   }
 
   render(){
+    let lang = this.props.lang || Languages.English;
+    console.log('Lang: ' + lang + ' ' + Dictionary.Email[lang]);
     return (
       <View style={styles.container}>
         {this.state.loading &&
@@ -129,22 +142,28 @@ export default class Login extends Component {
             <View style={styles.SectionStyle}>
               <TextInput
                   style={{ flex: 1 }}
-                  placeholder="Email"
+                  placeholder={Dictionary.Email[lang]}
+                  placeholderTextColor="grey"
+                  autoComplete="email"
                   onChangeText={this.handleEmailChange}
                   value={this.state.email}
                   name="email"
                   underlineColorAndroid="transparent"
+                  autoCorrect={false}
               />
           </View>
             <View style={styles.SectionStyle}>
               <TextInput
                   style={{ flex: 1 }}
                   onChangeText={this.handlePasswordChange}
-                  placeholder="Password"
+                  placeholder={Dictionary.Password[lang]}
+                  placeholderTextColor="grey"
+                  autoComplete="password"
                   value={this.state.password}
                   name="password"
                   secureTextEntry={(!this.state.showPassword)}
                   underlineColorAndroid="transparent"
+                  autoCorrect={false}
               />
               <TouchableOpacity onPress={this.toggleShowPassword}>
               <Image
@@ -156,7 +175,7 @@ export default class Login extends Component {
             <Button
               containerStyle={styles.button}
                 onPress={this.getUser}
-                title="Login"
+                title={Dictionary.LoginText[lang]}
                 color="#BC313A"
                 raised="true"
               />
@@ -175,9 +194,10 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   textInput: {
-    height: 40,
+    height: 50,
     width: 200,
     borderRadius: 4,
+    color: 'black',
     borderColor: 'lightgrey',
     borderStyle: 'solid',
     borderWidth: 1,

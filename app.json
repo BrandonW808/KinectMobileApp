@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kinect",
     "slug": "Kinect",
-    "version": "1.0.6",
+    "version": "1.0.9",
     "orientation": "portrait",
     "splash": {
       "image": "./assets/logo.png",
@@ -17,13 +17,13 @@
     ],
     "ios": {
       "bundleIdentifier": "com.kinect.kinectapp",
-      "buildNumber": "1.0.6",
+      "buildNumber": "1.0.9",
       "supportsTablet": true,
       "icon": "./assets/faviconapple.png",
     },
     "android": {
       "package": "com.kinect.kinect",
-      "versionCode": 12,
+      "versionCode": 15,
       "permissions": [],
       "icon": "./assets/favicon.png",
     },
